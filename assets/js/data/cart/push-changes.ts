@@ -20,6 +20,7 @@ import isShallowEqual from '@wordpress/is-shallow-equal';
 import { STORE_KEY } from './constants';
 import { VALIDATION_STORE_KEY } from '../validation';
 import { processErrorResponse } from '../utils';
+import { STORE_KEY as CHECKOUT_STORE_KEY } from '../checkout/constants';
 
 type CustomerData = {
 	billingAddress: CartBillingAddress;
@@ -185,6 +186,11 @@ const updateCustomerData = debounce( (): void => {
 		);
 		dirtyProps.shippingAddress = [];
 	}
+
+	const checkoutStore = select( CHECKOUT_STORE_KEY );
+	const prefersCollection = checkoutStore.prefersCollection();
+
+	customerDataToUpdate.prefers_collection = prefersCollection;
 
 	// If there is customer data to update, push it to the server.
 	if ( Object.keys( customerDataToUpdate ).length ) {

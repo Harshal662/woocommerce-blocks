@@ -219,4 +219,5 @@ export interface ExtensionCartUpdateArgs {
 export interface BillingAddressShippingAddress {
 	billing_address: Partial< CartBillingAddress >;
 	shipping_address: Partial< CartShippingAddress >;
+	prefers_collection?: boolean | undefined;
 }
