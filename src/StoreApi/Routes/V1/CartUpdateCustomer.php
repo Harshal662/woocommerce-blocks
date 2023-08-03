@@ -40,19 +40,25 @@ class CartUpdateCustomer extends AbstractCartRoute {
 				'callback'            => [ $this, 'get_response' ],
 				'permission_callback' => '__return_true',
 				'args'                => [
-					'billing_address'  => [
+					'billing_address'    => [
 						'description'       => __( 'Billing address.', 'woo-gutenberg-products-block' ),
 						'type'              => 'object',
 						'context'           => [ 'view', 'edit' ],
 						'properties'        => $this->schema->billing_address_schema->get_properties(),
 						'sanitize_callback' => null,
 					],
-					'shipping_address' => [
+					'shipping_address'   => [
 						'description'       => __( 'Shipping address.', 'woo-gutenberg-products-block' ),
 						'type'              => 'object',
 						'context'           => [ 'view', 'edit' ],
 						'properties'        => $this->schema->shipping_address_schema->get_properties(),
 						'sanitize_callback' => null,
+					],
+					'prefers_collection' => [
+						'description' => __( 'Whether the customer prefers to collect the order.', 'woo-gutenberg-products-block' ),
+						'type'        => 'boolean',
+						'context'     => [ 'view', 'edit' ],
+						'required'    => false,
 					],
 				],
 			],
@@ -122,7 +128,6 @@ class CartUpdateCustomer extends AbstractCartRoute {
 	protected function get_route_post_response( \WP_REST_Request $request ) {
 		$cart     = $this->cart_controller->get_cart_instance();
 		$customer = wc()->customer;
-
 		// Get data from request object and merge with customer object, then sanitize.
 		$billing  = $this->schema->billing_address_schema->sanitize_callback(
 			wp_parse_args(
@@ -208,7 +213,9 @@ class CartUpdateCustomer extends AbstractCartRoute {
 
 		$this->cart_controller->calculate_totals();
 
-		return rest_ensure_response( $this->schema->get_item_response( $cart ) );
+		$prefers_collection = isset( $request['prefers_collection'] ) ? $request['prefers_collection'] : false;
+
+		return rest_ensure_response( $this->schema->get_item_response( $cart, $prefers_collection ) );
 	}
 
 	/**

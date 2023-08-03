@@ -329,9 +329,10 @@ class CartSchema extends AbstractSchema {
 	 * Convert a woo cart into an object suitable for the response.
 	 *
 	 * @param \WC_Cart $cart Cart class instance.
+	 * @param bool     $prefers_collection Whether to return a collection of items or a single item.
 	 * @return array
 	 */
-	public function get_item_response( $cart ) {
+	public function get_item_response( $cart, $prefers_collection = false ) {
 		$controller = new CartController();
 
 		// Get cart errors first so if recalculations are performed, it's reflected in the response.
@@ -345,9 +346,29 @@ class CartSchema extends AbstractSchema {
 		// Get shipping packages to return in the response from the cart.
 		$shipping_packages = $has_calculated_shipping ? $controller->get_shipping_packages() : [];
 
+		$shipping_rates = $this->get_item_responses_from_schema( $this->shipping_rate_schema, $shipping_packages );
+
+		if ( $prefers_collection ) {
+			$shipping_rates = array_map(
+				function ( $shipping_rate ) {
+					$inner_shipping_rates = &$shipping_rate['shipping_rates'];
+
+					$inner_shipping_rates            = array_map(
+						function ( $inner_shipping_rate ) {
+							$inner_shipping_rate['selected'] = 'pickup_location:0' === $inner_shipping_rate['rate_id'];
+							return $inner_shipping_rate;
+						},
+						$inner_shipping_rates
+					);
+					$shipping_rate['shipping_rates'] = $inner_shipping_rates;
+					return $shipping_rate;
+				},
+				$shipping_rates
+			);
+		}
+
 		// Get visible cross sells products.
 		$cross_sells = array_filter( array_map( 'wc_get_product', $cart->get_cross_sells() ), 'wc_products_array_filter_visible' );
-
 		return [
 			'items'                   => $this->get_item_responses_from_schema( $this->item_schema, $cart->get_cart() ),
 			'coupons'                 => $this->get_item_responses_from_schema( $this->coupon_schema, $cart->get_applied_coupons() ),
@@ -359,7 +380,7 @@ class CartSchema extends AbstractSchema {
 			'needs_shipping'          => $cart->needs_shipping(),
 			'payment_requirements'    => $this->extend->get_payment_requirements(),
 			'has_calculated_shipping' => $has_calculated_shipping,
-			'shipping_rates'          => $this->get_item_responses_from_schema( $this->shipping_rate_schema, $shipping_packages ),
+			'shipping_rates'          => $shipping_rates,
 			'items_count'             => $cart->get_cart_contents_count(),
 			'items_weight'            => wc_get_weight( $cart->get_cart_contents_weight(), 'g' ),
 			'cross_sells'             => $this->get_item_responses_from_schema( $this->cross_sells_item_schema, $cross_sells ),
