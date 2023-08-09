@@ -139,6 +139,7 @@ describe( 'pushChanges', () => {
 
 		// Check that the mock was called with only the updated data.
 		await expect( updateCustomerDataMock ).toHaveBeenCalledWith( {
+			prefers_collection: false,
 			shipping_address: {
 				city: 'Houston',
 				state: 'TX',
@@ -184,6 +185,7 @@ describe( 'pushChanges', () => {
 		// to the server because the previous push failed when they were originally changed.
 		pushChanges();
 		await expect( updateCustomerDataMock ).toHaveBeenLastCalledWith( {
+			prefers_collection: false,
 			shipping_address: {
 				city: 'Houston',
 				state: 'TX',
