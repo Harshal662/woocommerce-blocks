@@ -122,7 +122,7 @@ const updateCustomerData = (): void => {
 	const prefersCollection = checkoutStore.prefersCollection();
 
 	customerDataToUpdate.prefers_collection = prefersCollection;
-  
+
 	dispatch( STORE_KEY )
 		.updateCustomerData( customerDataToUpdate )
 		.then( () => {
