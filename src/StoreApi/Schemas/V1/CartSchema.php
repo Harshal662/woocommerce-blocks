@@ -348,25 +348,6 @@ class CartSchema extends AbstractSchema {
 
 		$shipping_rates = $this->get_item_responses_from_schema( $this->shipping_rate_schema, $shipping_packages );
 
-		if ( $prefers_collection ) {
-			$shipping_rates = array_map(
-				function ( $shipping_rate ) {
-					$inner_shipping_rates = &$shipping_rate['shipping_rates'];
-
-					$inner_shipping_rates            = array_map(
-						function ( $inner_shipping_rate ) {
-							$inner_shipping_rate['selected'] = 'pickup_location:0' === $inner_shipping_rate['rate_id'];
-							return $inner_shipping_rate;
-						},
-						$inner_shipping_rates
-					);
-					$shipping_rate['shipping_rates'] = $inner_shipping_rates;
-					return $shipping_rate;
-				},
-				$shipping_rates
-			);
-		}
-
 		// Get visible cross sells products.
 		$cross_sells = array_filter( array_map( 'wc_get_product', $cart->get_cross_sells() ), 'wc_products_array_filter_visible' );
 		return [

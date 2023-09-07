@@ -215,6 +215,8 @@ class CartUpdateCustomer extends AbstractCartRoute {
 
 		$prefers_collection = isset( $request['prefers_collection'] ) ? $request['prefers_collection'] : false;
 
+		WC()->session->set( 'prefers_collection', $prefers_collection );
+
 		return rest_ensure_response( $this->schema->get_item_response( $cart, $prefers_collection ) );
 	}
 

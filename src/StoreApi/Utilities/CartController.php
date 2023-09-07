@@ -882,6 +882,7 @@ class CartController {
 		$session_data[ $package_id ] = $rate_id;
 
 		wc()->session->set( 'chosen_shipping_methods', $session_data );
+		wc()->session->set( 'selected_shipping_rate_id', $rate_id );
 	}
 
 	/**
