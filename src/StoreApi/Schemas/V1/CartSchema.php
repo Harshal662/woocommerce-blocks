@@ -348,6 +348,9 @@ class CartSchema extends AbstractSchema {
 
 		$shipping_rates = $this->get_item_responses_from_schema( $this->shipping_rate_schema, $shipping_packages );
 
+		// If prefers_collection is true, force select local pickup shipping method.
+		$shipping_rates = $prefers_collection ? $controller->force_select_local_pickup( $shipping_rates ) : $shipping_rates;
+
 		// Get visible cross sells products.
 		$cross_sells = array_filter( array_map( 'wc_get_product', $cart->get_cross_sells() ), 'wc_products_array_filter_visible' );
 		return [

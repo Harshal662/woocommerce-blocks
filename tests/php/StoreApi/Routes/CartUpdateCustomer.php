@@ -143,6 +143,18 @@ class CartUpdateCustomer extends ControllerTestCase {
 		$shipping_rates = $response_data['shipping_rates'];
 		$method_id = 'pickup_location';
 		$rate_selected = $this->is_rate_selected($shipping_rates, $method_id);
-		$this->assertTrue( $rate_selected , "Local pickup should be selected.");
+		$this->assertTrue( $rate_selected , 'Local pickup should be selected.' );
+
+		$session_data = wc()->session->get( 'chosen_shipping_methods', array() );
+
+		$has_local_pickup = array_reduce(
+			$session_data,
+			function ( $found, $item ) {
+				return $found || strpos( $item, 'pickup_location' ) !== false;
+			},
+			false
+		);
+
+		$this->assertTrue( $has_local_pickup, 'Local pickup data is updated in session' );
 	}
 }

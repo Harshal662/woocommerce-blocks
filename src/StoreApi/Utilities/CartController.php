@@ -886,6 +886,58 @@ class CartController {
 	}
 
 	/**
+	 * Forces to select local pickup as selected rated in shipping rates.
+	 *
+	 * @param array $shipping_rates Shipping rates.
+	 * @return array
+	 */
+	public function force_select_local_pickup( $shipping_rates) {
+		$shipping_rates = array_map(
+			function ( $shipping_rate ) {
+				$inner_shipping_rates = &$shipping_rate['shipping_rates'];
+
+				$inner_shipping_rates            = array_map(
+					function ( $inner_shipping_rate ) {
+						$prefers_collection_id           = wc()->session->get( 'selected_shipping_rate_id', false );
+						$prefers_collection_id           = $prefers_collection_id ? $prefers_collection_id : 'pickup_location:0';
+						$inner_shipping_rate['selected'] = $prefers_collection_id === $inner_shipping_rate['rate_id'];
+						return $inner_shipping_rate;
+					},
+					$inner_shipping_rates
+				);
+				$shipping_rate['shipping_rates'] = $inner_shipping_rates;
+				return $shipping_rate;
+			},
+			$shipping_rates
+		);
+
+		$this->force_update_session_data();
+
+		return $shipping_rates;
+	}
+
+	/**
+	 * Forces the session data to be updated to include local pickup.
+	 */
+	public function force_update_session_data() {
+		$session_data = wc()->session->get( 'chosen_shipping_methods', array() );
+		$prefers_collection_id = wc()->session->get( 'selected_shipping_rate_id', false );
+		$has_local_pickup = array_reduce(
+			$session_data,
+			function ( $found, $item ) {
+				return $found || strpos( $item, 'pickup_location' ) !== false;
+			},
+			false
+		);
+
+		if ( ! $has_local_pickup ) {
+			$new_value = strpos( $prefers_collection_id, 'pickup_location:0' ) !== false ? array( $prefers_collection_id ) : array( 'pickup_location:0' );
+			wc()->session->set( 'chosen_shipping_methods', $new_value );
+
+		}
+	}
+
+	/**
 	 * Based on the core cart class but returns errors rather than rendering notices directly.
 	 *
 	 * @todo Overriding the core apply_coupon method was necessary because core outputs notices when a coupon gets

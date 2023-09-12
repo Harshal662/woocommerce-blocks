@@ -76,33 +76,10 @@ class ShippingController {
 		add_filter( 'woocommerce_shipping_settings', array( $this, 'remove_shipping_settings' ) );
 		add_filter( 'wc_shipping_enabled', array( $this, 'force_shipping_enabled' ), 100, 1 );
 		add_filter( 'woocommerce_order_shipping_to_display', array( $this, 'show_local_pickup_details' ), 10, 2 );
-		add_filter( 'woocommerce_shipping_chosen_method', array( $this, 'woocommerce_selected_shipping_chosen_method' ), 10, 2 );
 		// This is required to short circuit `show_shipping` from class-wc-cart.php - without it, that function
 		// returns based on the option's value in the DB and we can't override it any other way.
 		add_filter( 'option_woocommerce_shipping_cost_requires_address', array( $this, 'override_cost_requires_address_option' ) );
 	}
-
-	/**
-	 * Determine the chosen shipping method based on user's preference for collection.
-	 *
-	 * This function checks if the user has a preference for collection stored in the session.
-	 * If so, it returns the preferred collection ID. If not, it defaults to the provided shipping method.
-	 *
-	 * @param string $method   The default shipping method.
-	 * @param array  $package  The package for which we're determining the shipping method.
-	 *
-	 * @return string Returns the preferred shipping rate ID if set, otherwise the default shipping method.
-	 */
-	public function woocommerce_selected_shipping_chosen_method( $method, $package ) {
-		$prefers_collection = wc()->session->get( 'prefers_collection', false );
-		if ( $prefers_collection ) {
-			$prefers_collection_id = wc()->session->get( 'selected_shipping_rate_id', false );
-			return $prefers_collection_id;
-		}
-
-		return $method;
-	}
-
 
 	/**
 	 * Overrides the option to force shipping calculations NOT to wait until an address is entered, but only if the
