@@ -891,7 +891,7 @@ class CartController {
 	 * @param array $shipping_rates Shipping rates.
 	 * @return array
 	 */
-	public function force_select_local_pickup( $shipping_rates) {
+	public function force_select_local_pickup( $shipping_rates ) {
 		$shipping_rates = array_map(
 			function ( $shipping_rate ) {
 				$inner_shipping_rates = &$shipping_rate['shipping_rates'];
@@ -920,9 +920,9 @@ class CartController {
 	 * Forces the session data to be updated to include local pickup.
 	 */
 	public function force_update_session_data() {
-		$session_data = wc()->session->get( 'chosen_shipping_methods', array() );
+		$session_data          = wc()->session->get( 'chosen_shipping_methods', array() );
 		$prefers_collection_id = wc()->session->get( 'selected_shipping_rate_id', false );
-		$has_local_pickup = array_reduce(
+		$has_local_pickup      = array_reduce(
 			$session_data,
 			function ( $found, $item ) {
 				return $found || strpos( $item, 'pickup_location' ) !== false;
